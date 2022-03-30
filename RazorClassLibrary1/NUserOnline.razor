@@ -1,0 +1,22 @@
+﻿@using Microsoft.JSInterop;
+@inject IUserOnlineService service
+@*Phải nằm trong thư mục Base*@
+@code {
+    [CascadingParameter] protected System.Security.Claims.ClaimsPrincipal User { get; set; }
+    [JSInvokable]
+    public async Task Online() => await service.Online(User);
+
+    protected override async Task OnInitializedAsync() {
+        await service.Online(User);
+        await base.OnInitializedAsync();
+    }
+    bool isRun;
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if(!isRun) {
+            isRun = true;
+            var objRef = DotNetObjectReference.Create(this);
+            await jSRuntimeClient.InitUserOnline(objRef);
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}
